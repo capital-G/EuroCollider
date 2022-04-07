@@ -266,10 +266,9 @@ EuroClockOut {
 	var clock;
 	var out;
 	var resolution;
-
 	var <synth;
 
-	*new { |clock=nil, out, resolution=1|
+	*new { |clock, out, resolution=1|
 		^super.newCopyArgs(
 			clock,
 			out,
@@ -280,27 +279,35 @@ EuroClockOut {
 	init {
 		var routine;
 
-		// send this via bundle as well?
-		SynthDef(\EuroColliderClockOut, {|out, tempo|
-			Out.ar(out, Impulse.ar(tempo));
-		}).add;
+		synth = Synth(\EuroColliderClockOut, [
+			\out, out,
+		]);
 
-		// spawn synth according to clock
-		// see Scheduling and Server timing
-		routine = Routine({Server.default.makeBundle(
-			time: Server.default.latency,
-			func: {
-				synth = Synth(\EuroColliderClockOut, [
-					\out, out,
-					\tempo, clock.tempo*resolution
-				]);
-			},
-		)});
+		routine = Routine({
+			inf.do({
+				"update clock %".format(resolution).postln;
+				Server.default.makeBundle(
+					time: Server.default.latency,
+					func: {
+						synth.set(\t_trig, 1);
+					},
+				);
+				resolution.reciprocal.wait;
+			});
+		});
 		clock.schedAbs(clock.elapsedBeats.roundUp(1), routine);
 	}
 
-	updateClock {
-		// TODO
-		"not implemented yet".postln;
+	*initClass {
+		StartUp.add({
+			EuroClockOut.buildSynthDef;
+		});
+	}
+
+	*buildSynthDef {
+		SynthDef(\EuroColliderClockOut, {|out, t_trig|
+			var env = EnvGen.ar(Env.perc(0.001, 0.1), gate: t_trig);
+			Out.ar(out, env);
+		}).add;
 	}
 }

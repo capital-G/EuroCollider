@@ -61,7 +61,10 @@ EuroSynth {
 			var env = EnvGen.ar(Env.perc(0.001, 0.1), gate: t_gate);
 			Out.ar(cvOut, DC.ar(1.0)*dcOffset);
 			Out.ar(trigOut, env);
-		}).play;
+		}).play(args: [
+			\cvOut, cvOut,
+			\trigOut, trigOut,
+		]);
 	}
 
 	addTuner {

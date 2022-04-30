@@ -21,6 +21,7 @@ EuroSynth {
 	var <soundIn;
 	var <cvOut;
 	var <trigOut;
+	var <negativeVoltage;
 
 	var <curFreq;
 	var oscFunc;
@@ -32,11 +33,12 @@ EuroSynth {
 	var tunerOscChannel;
 	var tunerDefName;
 
-	*new {|soundIn, cvOut, trigOut|
+	*new {|soundIn, cvOut, trigOut, negativeVoltage=false|
 		^super.newCopyArgs(
 			soundIn,
 			cvOut,
 			trigOut,
+			negativeVoltage,
 		).init;
 	}
 
@@ -106,6 +108,11 @@ EuroSynth {
 	tune { |baseFreq=55, steps=40, endRange=0.5, negativeSteps=0, minMatch=0.5|
 		var routine;
 
+		if((negativeSteps>0).and(negativeVoltage.not), {
+			"Please spawn a EuroSynth which allows for negative voltages when tuning in negative domain".warn;
+			^this;
+		});
+
 		if(tuner.notNil) {
 			"Can only run one tuning process at a time".postln;
 			^this;
@@ -169,7 +176,10 @@ EuroSynth {
 	}
 
 	freqCv {|freq|
-		// todo check if is tuned!!!
+		if(isTuned.not, {
+			"% is not tuned. Please tune it.".format(this).warn;
+			^0.0;
+		});
 		// get 2 closest values in tuning array
 		var tArray = tuningMap.asSortedArray;
 		var tFreqs = tArray.collect({|i| i[1]});

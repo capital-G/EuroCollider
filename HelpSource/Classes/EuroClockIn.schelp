@@ -1,0 +1,61 @@
+TITLE:: EuroClockIn
+summary:: Allows to sync SuperCollider by eurorack clock
+categories:: EuroCollider
+related:: Classes/EuroSynth, Classes/EuroClockOut, Guides/EuroCollider
+
+DESCRIPTION::
+Allows to use a trigger signal from eurorack as a link::Classes/TempoClock:: in SuperCollider, therefore allowing to sync SuperCollider according to your modular.
+
+Assuming the trigger signal is connected to input 6 (including 0!) of your soundcard it is as simple as
+
+code::
+c = EuroClockIn(in: 6);
+
+// play a pattern according to the clock
+(
+Pdef(\euroClockSync, Pbind(
+	\instrument, \default,
+	\dur, 1.0,
+	\degree, Pxrand((0..6), inf),
+)).clock_(c.clock).play;
+)
+
+Pdef(\euroClockSync).stop;
+::
+
+CLASSMETHODS::
+
+METHOD:: new
+argument:: in
+link::Classes/SoundIn:: bus number where the trigger signal is arriving.
+argument:: mean
+Number of points to consider for calculating the current tempo.
+More points provide higher stability while at the same time may take a longer time to a new tempo if the trigger rate is changed.
+argument:: threshold
+Which amplitude is necessary in order to account as a trigger.
+
+
+INSTANCEMETHODS::
+
+METHOD:: clock
+Access to the link::Classes/TempoClock:: with the tempo from the eurorack.
+
+
+METHOD:: timeStamps
+Collected time stamps where a trigger was measured.
+This will only hold the n last values where n is the mean number set during init.
+
+PRIVATE:: init
+
+PRIVATE:: prUpdateClockTempo
+
+PRIVATE:: prInsertTimeStamp
+
+PRIVATE:: prCalculateTempo
+
+
+EXAMPLES::
+
+code::
+_some_example_code_
+::

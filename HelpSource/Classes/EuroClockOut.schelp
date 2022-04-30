@@ -1,0 +1,48 @@
+TITLE:: EuroClockOut
+summary:: Allows to sync your modular to a TempoClock
+categories:: EuroCollider
+related:: Classes/EuroClockIn, Classes/EuroSynth, Guides/EuroCollider
+
+DESCRIPTION::
+Will output trigger signals according to a given link::Classes/TempoClock:: which can be used to sync a modular synth to a SuperCollider clock.
+It is also possible to do it the other way, syncing SuperCollider according to a eurorack trigger input, see link::Classes/EuroClockIn::.
+
+Assuming that the output number 5 (including 0!) of the soundcard is connected with a trigger in of the modlar it is as simple as
+
+code::
+// create a new clock
+c = TempoClock(1.0);
+e = EuroClockOut(clock: c, out: 5, resolution: 0.5);
+// change the tempo of the clock will also work
+c.tempo = 1.5;
+::
+
+CLASSMETHODS::
+
+PRIVATE:: initClass
+
+PRIVATE:: buildSynthDef
+
+METHOD:: new
+argument:: clock
+A link::Classes/TempoClock:: which will be the source
+argument:: out
+link::Classes/Out:: bus number where a trigger signal will be put out
+argument:: resolution
+Allows to change the resolution of the clock.
+2.0 will put as twice as fast triggers, 0.5 only every 2nd trigger.
+
+INSTANCEMETHODS::
+
+PRIVATE:: init
+
+METHOD:: synth
+
+A synth which will be used to output the trigger signals.
+
+
+EXAMPLES::
+
+code::
+_some_example_code_
+::

@@ -1,0 +1,120 @@
+TITLE:: EuroSynth
+summary:: Translation between SuperCollider synth and EuroRack modules
+categories:: EuroCollider
+related:: Classes/EuroClockIn, Classes/EuroClockOut, classes/Pbind, Guides/EuroCollider
+
+DESCRIPTION::
+EuroSynth implements a tuning system so the Pattern system of SuperCollider can be used on a eurorack modular system.
+
+NOTE::
+In order to use the CV functionality of EuroSynth you need a DC coupled interface.
+Check link::Guides/EuroCollider:: for more information on this.
+::
+
+
+Before starting make sure you have wired everything up properly.
+In this example we will use
+
+LIST::
+## The audio signal of the synth is connected to input 6 (including 0!) of the audio interface
+## output 4 (including 0!) of the audio interface is connected to the cvIn of the module
+## output 5 (including 0!) is connected to a trigger - this is optional
+::
+
+Also make sure that you have started the server with the appropiated device and number of out- and inputs, see link::Classes/ServerOptions::.
+
+code::
+// define new EuroSynth and tune it directly
+e = EuroSynth(soundIn: 6, cvOut: 4, trigOut: 5).tune;
+
+// after the tuning process finished we can use the synth in a pattern
+(
+Pdef(\myEuroPattern, Pbind(
+	\type, \euro,
+	\euro, e,
+	\dur, 0.25,
+	\scale, Scale.chromatic,
+	\degree, Pxrand((0..12), inf),
+	\octave, Pseq([5, 4], inf),
+)).play;
+)
+
+Pdef(\myEuroPattern).stop;
+::
+
+CLASSMETHODS::
+
+PRIVATE:: addEventType
+
+
+PRIVATE:: initClass
+
+METHOD:: new
+argument:: soundIn
+link::Classes/SoundIn:: bus number where the audio signal of the module is arriving.
+argument:: cvOut
+link::Classes/Out:: bus number where the cv signal should be put out.
+Needs to be connected to the CV in of the module.
+argument:: trigOut
+Optional link::Classes/Out:: bus number where a trigger signal will be put out.
+argument:: negativeVoltage
+If true it will also allow to output negative voltages.
+Some modules are fine with this (e.g. MakeNoise STO) but others are not (e.g. Mutable Instruments Plaits), therefore it is turned off by default.
+
+
+INSTANCEMETHODS::
+
+METHOD:: tune
+Will run the (re-)tuning procedure for the synth.
+argument:: baseFreq
+Reference frequency which should be considered a starting point for the tuning process.
+Should be a low note because we will go up the scale.
+argument:: steps
+Number of steps which will be used for tuning.
+argument:: endRange
+End of tuning range. 0.5 will cover around 4 octaves.
+argument:: negativeSteps
+Allows to also tune a number of negative steps as well.
+This is only allowed if the EuroSynth instance was initiated with negativeVoltage set to true.
+argument:: minMatch
+midi steps which tollerate a deviation from the baseFreq during absolute tuning.
+
+
+PRIVATE:: init
+
+METHOD:: tuningMap
+A link::Classes/Dictionary:: in which the internal relation between CV and frequency is stored.
+
+METHOD:: synth
+A synth which is used to control the output of the DC offset (aka CV) and the trigger of the EuroSynth.
+
+METHOD:: resetTuning
+Will reset the tuning.
+
+METHOD:: isTuned
+A boolean if the synth was already tuned or not.
+
+
+METHOD:: freqCv
+Allows to convert a frequency to a CV value.
+This is used internally when called a pattern is used but can be useful for manula setting of frequencies.
+argument:: freq
+
+PRIVATE:: curFreq
+
+METHOD:: trigOut
+
+METHOD:: negativeVoltage
+
+METHOD:: soundIn
+
+METHOD:: cvOut
+
+PRIVATE:: addTuner
+
+
+EXAMPLES::
+
+code::
+_some_example_code_
+::

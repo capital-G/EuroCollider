@@ -1,0 +1,10 @@
+TITLE:: EuroCollider
+summary:: Translation between SuperCollider and Eurorack
+categories:: EuroCollider
+related:: Classes/EuroSynth, Classes/EuroClockIn, Classes/EuroClockOut
+
+Some introduction.
+
+SECTION:: Quickstart
+
+SECTION:: Supported audio interfaces

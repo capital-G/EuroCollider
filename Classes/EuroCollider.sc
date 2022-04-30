@@ -100,13 +100,7 @@ EuroSynth {
 		});
 	}
 
-	prMakeOscFunc {
-		oscFunc = OSCFunc({|msg|
-			curFreq = msg[3];
-		}, path: tunerOscChannel);
-	}
-
-	tune { |baseFreq=55|
+	tune { |baseFreq=55, steps=40, endRange=0.5, negativeSteps=0|
 		var routine;
 
 		if(tuner.notNil) {
@@ -114,7 +108,9 @@ EuroSynth {
 			^this;
 		};
 
-		this.prMakeOscFunc();
+		oscFunc = OSCFunc({|msg|
+			curFreq = msg[3];
+		}, path: tunerOscChannel);
 
 		tuner = SynthDef(tunerDefName, {|in, cvOut, dcOffset=0|
 			var freq;
@@ -144,7 +140,7 @@ EuroSynth {
 
 			"Absolute pitch is tuned, start relative tuning".postln;
 
-			((0..40)/80).do({|i|
+			((negativeSteps.neg..steps)/(steps*(endRange.reciprocal))).do({|i|
 				tuner.set(\dcOffset, i);
 				0.5.wait;
 				tuningMap[i] = curFreq;

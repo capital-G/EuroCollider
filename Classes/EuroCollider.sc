@@ -91,11 +91,6 @@ EuroSynth {
 			if((euroSynth.class == EuroSynth).not, {
 				^"Add a tuned EuroSynth as \"euro\" parameter to you event".postln;
 			});
-			/*
-			if(euroSynth.synth.isRunning.not, {
-				^"Please revive synth".postln;
-			});
-			*/
 			euroSynth.synth.set(
 				\dcOffset, euroSynth.freqCv(~freq.value).postln;
 			);
@@ -176,25 +171,54 @@ EuroSynth {
 	}
 
 	freqCv {|freq|
+		var tArray;
+		var tFreqs;
+		var tCvs;
+		var fDistances;
+		var closestIs;
+		var omega;
+		var cv;
+		var lowestFreq;
+		var highestFreq;
+
 		if(isTuned.not, {
 			"% is not tuned. Please tune it.".format(this).warn;
 			^0.0;
 		});
+
 		// get 2 closest values in tuning array
-		var tArray = tuningMap.asSortedArray;
-		var tFreqs = tArray.collect({|i| i[1]});
-		var tCvs = tArray.collect({|i| i[0]});
-		var fDistances = tFreqs - freq;
+		tArray = tuningMap.asSortedArray;
+		tFreqs = tArray.collect({|i| i[1]});
+		tCvs = tArray.collect({|i| i[0]});
+
+		// get range of our tuning
+		lowestFreq = tFreqs.sort[0];
+		highestFreq = tFreqs.sort.reverse[0];
+
 		// search for closest indices
-		var closestIs = (0..fDistances.size-1).sort({|a, b|
+		fDistances = tFreqs - freq;
+		closestIs = (0..fDistances.size-1).sort({|a, b|
 			fDistances.abs[a]<fDistances.abs[b];
 		});
+
+
 		// calculate w = (f-b)/(a-b)
 		// where w is how much we need mix a and b to get f
 		// which we will use to calculate the proper cv mix
-		var omega = (freq-tFreqs[closestIs[1]])/(tFreqs[closestIs[0]] - tFreqs[closestIs[1]]);
-		// now calculate cv = a*w + b(1-w)
-		var cv = (tCvs[closestIs[0]] * omega) + (tCvs[closestIs[1]] * (1-omega));
+		omega = (freq-tFreqs[closestIs[1]])/(tFreqs[closestIs[0]] - tFreqs[closestIs[1]]);
+		if(freq.inRange(lowestFreq, highestFreq), {
+			// now calculate cv = a*w + b(1-w)
+			cv = (tCvs[closestIs[0]] * omega) + (tCvs[closestIs[1]] * (1-omega));
+		}, {
+			// in case we exceed the min/max we only use the boundary for calculation
+			var freqToUse = if(freq <= lowestFreq, { lowestFreq }, { highestFreq });
+			var cvReference = tCvs[tFreqs.indexOf(freqToUse)];
+			cv = (freq/freqToUse)*cvReference;
+		});
+
+		if(negativeVoltage.not, {
+			cv = cv.max(0.0);
+		});
 		^cv;
 	}
 }

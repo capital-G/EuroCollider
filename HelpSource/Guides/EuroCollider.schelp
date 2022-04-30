@@ -8,3 +8,16 @@ Some introduction.
 SECTION:: Quickstart
 
 SECTION:: Supported audio interfaces
+
+SUBSECTION:: What is a DC coupled interface
+
+DC coupled interface allow to output a DC offset to the output.
+A list of audio interfaces can be found e.g. link::https://www.sweetwater.com/sweetcare/articles/which-audio-interfaces-are-dc-coupled/##here::.
+
+This means that with a DC offset of 0.2 a sine wave would not oscillate between -0.1 and 0.1 but between 0.1 and 0.3, so it does not oscillate around zero as a mean.
+Some interfaces do not allow to output such a DC offset to protect the loud speakers by adding a high pass filter which removes any offset which could be seen simply as a really slow oscillation.
+
+SUBSECTION:: What if I do not have access to a DC coupled interface?
+
+If the interface is not able to output a steady offset it is still able to output spikes which are gates.
+You can also output gates or input CVs from your EuroRack module to the input of SuperCollider.

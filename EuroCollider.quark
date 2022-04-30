@@ -1,0 +1,11 @@
+(
+	\name: 			"EuroCollider",
+	\path: 			"EuroCollider",
+	\summary:		"Builds communication between Eurorack and SuperCollider",
+	\isCompatible:	{ Main.versionAtMost(3, 10).not },
+	\author: 		"Dennis Scheiba",
+	\organisation:	"IMM Duesseldorf",
+	\helpdoc:		"help",
+	\since: 		"2022",
+	\version:		0.1
+)

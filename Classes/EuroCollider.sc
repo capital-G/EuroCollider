@@ -100,7 +100,7 @@ EuroSynth {
 		});
 	}
 
-	tune { |baseFreq=55, steps=40, endRange=0.5, negativeSteps=0|
+	tune { |baseFreq=55, steps=40, endRange=0.5, negativeSteps=0, minMatch=0.5|
 		var routine;
 
 		if(tuner.notNil) {
@@ -132,7 +132,9 @@ EuroSynth {
 
 		routine = Routine({
 			"Start tuning of %".format(this).postln;
-			while({(baseFreq - (curFreq?0)).cpsmidi.abs > 1.0}, {
+			// tune within one quarter tone (default)
+			// and from below
+			while({(baseFreq.cpsmidi - (curFreq ? 10).cpsmidi).inRange(0.0, minMatch).not}, {
 				// todo make this properly
 				"pleaseTune: %".format((baseFreq - (curFreq?0))).postln;
 				0.1.wait;

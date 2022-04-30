@@ -2,15 +2,12 @@
 TODO
 
 * check if audio interface has DC offset
-* add event type (necessary?);
 * add freq2cv(synth) to simple number?
 * add cv2freq
 * add check if clock stopped via a routine?
 * allow to update ClockOut?
 
 ---
-
-* Add synthdefs to StartUp like Default Synth?
 
 BUGS
 
@@ -20,21 +17,20 @@ BUGS
 */
 
 EuroSynth {
-	classvar tunerIsRunning;
-	classvar tunerOscChannel;
-	classvar tunerDefName;
-
 	// private variables
-	var soundIn;
-	var cvOut;
-	var trigOut;
-	var curFreq;
+	var <soundIn;
+	var <cvOut;
+	var <trigOut;
+
+	var <curFreq;
 	var oscFunc;
 	var <synth;
 	var tuner;
 	var <isTuned;
-
+	var randSeed;
 	var <tuningMap;
+	var tunerOscChannel;
+	var tunerDefName;
 
 	*new {|soundIn, cvOut, trigOut|
 		^super.newCopyArgs(
@@ -45,26 +41,30 @@ EuroSynth {
 	}
 
 	*initClass {
-		tunerOscChannel = "/EuroCollider/tuner";
-		tunerIsRunning = false;
-		tunerDefName = \EuroColliderTuner;
 		StartUp.add({
-			EuroSynth.buildDef;
 			EuroSynth.addEventType;
 		});
 	}
 
 	init {
+		// create a random channel to exchange OSC messages
+		// collision is possible but hopefully not occuring
+		randSeed = 10000000.rand;
+
+		tunerDefName = "EuroColiderTuner_%".format(randSeed).asSymbol;
+		tunerOscChannel = "/EuroCollider/tuner/%".format(randSeed);
+
 		tuningMap = ();
 		isTuned = false;
-		synth = Synth(\EuroColliderSynth, [
-			\cvOut, cvOut,
-			\trigOut, trigOut,
-			\dcOffset, 0,
-		]);
+
+		synth = SynthDef(\EuroColliderSynth, {|cvOut, trigOut, dcOffset=0, t_gate=0|
+			var env = EnvGen.ar(Env.perc(0.001, 0.1), gate: t_gate);
+			Out.ar(cvOut, DC.ar(1.0)*dcOffset);
+			Out.ar(trigOut, env);
+		}).play;
 	}
 
-	*buildDef {
+	addTuner {
 		SynthDef(tunerDefName, {|in, cvOut, dcOffset=0|
 			var freq;
 			var hasFreq;
@@ -77,12 +77,6 @@ EuroSynth {
 				values: [freq, hasFreq],
 			);
 			Out.ar(cvOut, DC.ar(1.0) * dcOffset);
-		}).add;
-
-		SynthDef(\EuroColliderSynth, {|cvOut, trigOut, dcOffset=0, t_gate=0|
-			var env = EnvGen.ar(Env.perc(0.001, 0.1), gate: t_gate);
-			Out.ar(cvOut, DC.ar(1.0)*dcOffset);
-			Out.ar(trigOut, env);
 		}).add;
 	}
 
@@ -115,19 +109,33 @@ EuroSynth {
 	tune { |baseFreq=55|
 		var routine;
 
-		"SoundIn: %".format(soundIn).postln;
-
-		if(tunerIsRunning) {
-			"Can only run one tuning process at a time".warn;
+		if(tuner.notNil) {
+			"Can only run one tuning process at a time".postln;
 			^this;
 		};
-		tunerIsRunning = true;
 
 		this.prMakeOscFunc();
 
-		tuner = Synth(\EuroColliderTuner, [\in, soundIn, \cvOut, cvOut]);
+		tuner = SynthDef(tunerDefName, {|in, cvOut, dcOffset=0|
+			var freq;
+			var hasFreq;
+
+			var soundIn = SoundIn.ar(in);
+			#freq, hasFreq = Pitch.kr(soundIn, minFreq: 25, median: 10);
+			SendReply.ar(
+				trig: Pulse.ar(10.0),
+				cmdName: tunerOscChannel,
+				values: [freq, hasFreq],
+			);
+			Out.ar(cvOut, DC.ar(1.0) * dcOffset);
+		}).play(args: [
+			\in, soundIn,
+			\cvOut, cvOut,
+		]);
+
 
 		routine = Routine({
+			"Start tuning of %".format(this).postln;
 			while({(baseFreq - (curFreq?0)).cpsmidi.abs > 1.0}, {
 				// todo make this properly
 				"pleaseTune: %".format((baseFreq - (curFreq?0))).postln;
@@ -146,7 +154,7 @@ EuroSynth {
 			tuner.set(\dcOffset, 0.0);
 			oscFunc.clear;
 			tuner.free;
-			tunerIsRunning = false;
+			tuner = nil;
 			isTuned = true;
 		}).play;
 	}

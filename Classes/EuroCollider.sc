@@ -145,6 +145,9 @@ EuroSynth {
 
 			"Absolute pitch is tuned, start relative tuning".postln;
 
+			// wait that hands get removed from tuning knob
+			1.0.wait;
+
 			((negativeSteps.neg..steps)/(steps*(endRange.reciprocal))).do({|i|
 				tuner.set(\dcOffset, i);
 				0.5.wait;

@@ -111,8 +111,7 @@ EuroSynth {
 	}
 
 	tune { |baseFreq=55, steps=40, endRange=0.5, negativeSteps=0, minMatch=0.5|
-		var routine;
-
+		// prepare tuning procedure
 		if((negativeSteps>0).and(negativeVoltage.not), {
 			"%: Please spawn a EuroSynth which allows for negative voltages when tuning in negative domain".format(this).warn;
 			^this;
@@ -143,9 +142,12 @@ EuroSynth {
 			\in, soundIn,
 			\cvOut, cvOut,
 		]);
+		// start actual tuning async
+		this.prTuningRoutine(baseFreq, steps, endRange, negativeSteps, minMatch);
+	}
 
-
-		routine = Routine({
+	prTuningRoutine { |baseFreq, steps, endRange, negativeSteps, minMatch|
+		Routine({
 			"%: Start tuning".format(this).postln;
 			// tune within one quarter tone (default)
 			// and from below
@@ -166,12 +168,20 @@ EuroSynth {
 				tuningMap[i] = curFreq;
 				"%: Step %:\t % Hz".format(this, i, curFreq).postln;
 			});
-			"%: Finished Tuning".format(this).postln;
+
 			tuner.set(\dcOffset, 0.0);
 			oscFunc.clear;
 			tuner.free;
 			tuner = nil;
-			isTuned = true;
+			// check if we measured the same frequency twice which would indicate
+			// a bad tuning procedure
+			if((tuningMap.asArray.collect({|v| v.asInteger}).asSet.size < (steps+negativeSteps)), {
+				"%: Tuning was probably unsuccessful as we measured the same freq at least twice. Try adjusting the tuning range or check wiring".format(this).postln;
+				isTuned = false;
+			}, {
+				"%: Finished Tuning".format(this).postln;
+				isTuned = true;
+			});
 		}).play;
 	}
 

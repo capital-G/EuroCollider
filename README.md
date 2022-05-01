@@ -36,7 +36,7 @@ Pdef(\myEuroPattern, Pbind(
 ### Sync SuperCollider via eurorack clock
 
 ```supercollider
-c = EuroClockIn(in: 6);
+c = EuroClockIn(trigIn: 6);
 
 // play a pattern according to the clock
 (
@@ -46,7 +46,13 @@ Pdef(\euroClockSync, Pbind(
     \degree, Pxrand((0..6), inf),
 )).clock_(c.clock).play;
 )
+```
 
+### Sync eurorack with SuperCollider TempoClock
+
+```supercollider
+c = TempoClock(1.5);
+e = EuroClockOut(clock: c, trigOut: 5);
 ```
 
 ## License

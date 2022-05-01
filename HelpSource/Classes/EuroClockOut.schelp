@@ -12,9 +12,13 @@ Assuming that the output number 5 (including 0!) of the soundcard is connected w
 code::
 // create a new clock
 c = TempoClock(1.0);
-e = EuroClockOut(clock: c, out: 5, resolution: 0.5);
+e = EuroClockOut(clock: c, trigOut: 5);
 // change the tempo of the clock will also work
 c.tempo = 1.5;
+// change resolution of the clock to put out triggers twice as fast
+e.resolution = 2.0;
+// stop putting out triggers
+e.clear;
 ::
 
 CLASSMETHODS::
@@ -25,12 +29,13 @@ PRIVATE:: buildSynthDef
 
 METHOD:: new
 argument:: clock
-A link::Classes/TempoClock:: which will be the source
-argument:: out
-link::Classes/Out:: bus number where a trigger signal will be put out
+A link::Classes/TempoClock:: which will be the source.
+If non provided we will fall back to link::Classes/TempoClock#*default::.
+argument:: trigOut
+link::Classes/Out:: bus number where a trigger signal will be put out.
 argument:: resolution
 Allows to change the resolution of the clock.
-2.0 will put as twice as fast triggers, 0.5 only every 2nd trigger.
+2.0 will put out triggers twice as fast and 0.5 twice as slow.
 
 INSTANCEMETHODS::
 
@@ -39,6 +44,16 @@ PRIVATE:: init
 METHOD:: controlSynth
 
 A synth which is used to output the trigger signals.
+
+METHOD:: clear
+
+Free resources on the server.
+
+METHOD:: resolution
+
+METHOD:: clock
+
+METHOD:: trigOut
 
 
 EXAMPLES::

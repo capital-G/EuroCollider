@@ -276,7 +276,7 @@ EuroSynth {
 }
 
 EuroClockIn {
-	var in;
+	var trigIn;
 	var mean;
 	var threshold;
 
@@ -286,9 +286,9 @@ EuroClockIn {
 	var <timeStamps;
 	var <clock;
 
-	*new { |in, mean=4, threshold=0.3|
+	*new { |trigIn, mean=4, threshold=0.3|
 		^super.newCopyArgs(
-			in,
+			trigIn,
 			mean,
 			threshold,
 		).init;
@@ -296,7 +296,7 @@ EuroClockIn {
 
 	init {
 		clock = TempoClock();
-		oscChannel = "/EuroCollider/EuroClockIn/%".format(in);
+		oscChannel = "/EuroCollider/EuroClockIn/%".format(trigIn);
 		timeStamps = [];
 
 		oscFunc = OSCFunc({|msg, time|
@@ -304,7 +304,7 @@ EuroClockIn {
 			this.prUpdateClockTempo;
 		}, oscChannel);
 
-		SynthDef(\EuroClockIn, {|inBus, threshold|
+		controlSynth = SynthDef(\EuroClockIn, {|inBus, threshold|
 			// use LocalIn to get a delay of one server buffer
 			var soundIn = SoundIn.ar(inBus);
 			var localIn = LocalIn.ar(1);
@@ -314,15 +314,10 @@ EuroClockIn {
 				cmdName: oscChannel,
 			);
 			Silent.ar;
-		}).add;
-
-		Server.default.makeBundle(
-			Server.default.latency,
-			{controlSynth=Synth(\EuroClockIn, [
-				\inBus, in,
-				\threshold, threshold,
-			])}
-		);
+		}).play(args: [
+			\inBus, trigIn,
+			\threshold, threshold,
+		]);
 	}
 
 	prInsertTimeStamp {|timeStamp|
@@ -361,59 +356,62 @@ EuroClockIn {
 	}
 
 	printOn { | stream |
-		stream << "EuroClockIn(in: " << in << ")";
+		stream << "EuroClockIn(trigIn: " << trigIn << ")";
+	}
+
+	clear {
+		controlSynth.free;
+		clock.stop;
 	}
 }
 
 EuroClockOut {
-	var clock;
-	var out;
-	var resolution;
+	var <clock;
+	var <trigOut;
+	var <>resolution;
 	var <controlSynth;
+	var routine;
 
-	*new { |clock, out, resolution=1|
+	*new { |clock, trigOut, resolution=1|
 		^super.newCopyArgs(
 			clock,
-			out,
+			trigOut,
 			resolution,
 		).init;
 	}
 
 	init {
-		var routine;
-
-		controlSynth = Synth(\EuroColliderClockOut, [
-			\out, out,
+		clock = clock ? TempoClock.default;
+		controlSynth = SynthDef(\EuroColliderClockOut, {|trigOut, t_trig|
+			var env = EnvGen.ar(Env.perc(0.001, 0.1), gate: t_trig);
+			Out.ar(trigOut, env);
+		}).play(args: [
+			\trigOut, trigOut,
 		]);
 
 		routine = Routine({
 			inf.do({
-				Server.default.makeBundle(
-					time: Server.default.latency,
-					func: {
-						controlSynth.set(\t_trig, 1);
-					},
-				);
+				if(clock.isRunning, {
+
+					Server.default.makeBundle(
+						time: Server.default.latency,
+						func: {
+							controlSynth.set(\t_trig, 1);
+						},
+					);
+				});
 				resolution.reciprocal.wait;
 			});
 		});
 		clock.schedAbs(clock.elapsedBeats.roundUp(1), routine);
 	}
 
-	*initClass {
-		StartUp.add({
-			EuroClockOut.buildSynthDef;
-		});
-	}
-
-	*buildSynthDef {
-		SynthDef(\EuroColliderClockOut, {|out, t_trig|
-			var env = EnvGen.ar(Env.perc(0.001, 0.1), gate: t_trig);
-			Out.ar(out, env);
-		}).add;
+	clear {
+		routine.stop;
+		controlSynth.free;
 	}
 
 	printOn { | stream |
-		stream << "EuroClockOut(out: " << out << ")";
+		stream << "EuroClockOut(trigOut: " << trigOut << ")";
 	}
 }

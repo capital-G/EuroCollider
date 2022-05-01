@@ -264,6 +264,12 @@ EuroSynth {
 		^cv;
 	}
 
+	clear {
+		controlSynth.free;
+		this.resetTuning;
+		this.monitor.clear;
+	}
+
 	printOn { | stream |
 		stream << "EuroSynth(soundIn: " << soundIn << ", cvOut: " << cvOut << ")";
 	}

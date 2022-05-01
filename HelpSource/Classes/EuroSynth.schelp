@@ -123,6 +123,10 @@ e.monitor.play;
 e.monitor.stop;
 ::
 
+METHOD:: clear
+Will clear and free everything associated from the server and reset the tuning.
+Use this before creating a new link::Classes/EuroSynth:: with the same output config but different settings, e.g. negativeVoltage.
+
 PRIVATE:: curFreq
 
 METHOD:: gateOut

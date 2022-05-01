@@ -104,12 +104,12 @@ EuroSynth {
 		var routine;
 
 		if((negativeSteps>0).and(negativeVoltage.not), {
-			"Please spawn a EuroSynth which allows for negative voltages when tuning in negative domain".warn;
+			"%: Please spawn a EuroSynth which allows for negative voltages when tuning in negative domain".format(this).warn;
 			^this;
 		});
 
 		if(tuner.notNil) {
-			"Can only run one tuning process at a time".postln;
+			"%: Can only run one tuning process at a time".format(this).postln;
 			^this;
 		};
 
@@ -136,16 +136,16 @@ EuroSynth {
 
 
 		routine = Routine({
-			"Start tuning of %".format(this).postln;
+			"%: Start tuning".format(this).postln;
 			// tune within one quarter tone (default)
 			// and from below
 			while({(baseFreq.cpsmidi - (curFreq ? 10).cpsmidi).inRange(0.0, minMatch).not}, {
 				// todo make this properly
-				"pleaseTune: %".format((baseFreq - (curFreq?0))).postln;
+				"%: Adjust tuning: % Hz".format(this, (curFreq?0) - baseFreq).postln;
 				0.1.wait;
 			});
 
-			"Absolute pitch is tuned, start relative tuning".postln;
+			"%: Absolute pitch is tuned, start relative tuning".format(this).postln;
 
 			// wait that hands get removed from tuning knob
 			1.0.wait;
@@ -154,9 +154,9 @@ EuroSynth {
 				tuner.set(\dcOffset, i);
 				0.5.wait;
 				tuningMap[i] = curFreq;
-				"% \tVolt: \t% Hz".format(i, curFreq).postln;
+				"%: Step %:\t % Hz".format(this, i, curFreq).postln;
 			});
-			"Finished Tuning";
+			"%: Finished Tuning".format(this).postln;
 			tuner.set(\dcOffset, 0.0);
 			oscFunc.clear;
 			tuner.free;
@@ -220,6 +220,10 @@ EuroSynth {
 			cv = cv.max(0.0);
 		});
 		^cv;
+	}
+
+	printOn { | stream |
+		stream << "EuroSynth(soundIn: " << soundIn << ", cvOut: " << cvOut << ")";
 	}
 }
 
@@ -300,11 +304,16 @@ EuroClockIn {
 				timeStamps.reverse[0],
 			);
 		}, {
-			"Waiting for % beats as input (only received %)".format(
-				mean,
+			"%: Received % out of % necessary beats".format(
+				this,
 				timeStamps.size,
+				mean,
 			).postln;
 		});
+	}
+
+	printOn { | stream |
+		stream << "EuroClockIn(in: " << in << ")";
 	}
 }
 
@@ -331,7 +340,6 @@ EuroClockOut {
 
 		routine = Routine({
 			inf.do({
-				"update clock %".format(resolution).postln;
 				Server.default.makeBundle(
 					time: Server.default.latency,
 					func: {
@@ -355,5 +363,9 @@ EuroClockOut {
 			var env = EnvGen.ar(Env.perc(0.001, 0.1), gate: t_trig);
 			Out.ar(out, env);
 		}).add;
+	}
+
+	printOn { | stream |
+		stream << "EuroClockOut(out: " << out << ")";
 	}
 }

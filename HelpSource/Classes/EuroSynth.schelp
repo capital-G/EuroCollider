@@ -7,8 +7,7 @@ DESCRIPTION::
 EuroSynth implements a tuning system so the Pattern system of SuperCollider can be used on a eurorack modular system.
 
 NOTE::
-In order to use the CV functionality of EuroSynth you need a DC coupled interface.
-Check link::Guides/EuroCollider:: for more information on this.
+Please check if your audio interface is DC coupled, see link::Guides/EuroCollider#What is a DC coupled interface:: for more information.
 ::
 
 
@@ -21,11 +20,11 @@ LIST::
 ## output 5 (including 0!) is connected to a gate input - this is optional
 ::
 
-Also make sure that you have started the server with the appropiated device and number of out- and inputs, see link::Classes/ServerOptions::.
+Also make sure that you have started the server with the appropiated device and number of out- and inputs, see link::Classes/ServerOptions:: and link::Guides/EuroCollider#Configure SuperCollider::
 
 code::
 // define new EuroSynth and tune it directly
-e = EuroSynth(soundIn: 6, cvOut: 4, gateOut: 5).tune;
+e = EuroSynth(soundIn: 6, cvOut: 4, gateOut: 5, playMonitor: true).tune;
 
 // after the tuning process finished we can use the synth in a pattern
 (
@@ -41,6 +40,27 @@ Pdef(\myEuroPattern, Pbind(
 )
 
 Pdef(\myEuroPattern).stop;
+::
+
+The build in monitor of EuroSynth is only mono and therefore you only may have heard something on your left speaker - this is intentional as SuperCollider is often used with an arbitrary number of output channels, therefore it should be your responsibility to map the input to your desired output.
+One strategy is to use Ndefs for this where we use e.g. link::Classes/Pan2::, so e.g.
+
+code::
+// stop the monitor of EuroSynth
+e.monitor.stop;
+
+(
+Ndef(\myEuroModule, {
+	Pan2.ar(SoundIn.ar(e.soundIn), \pos.kr(0.0));
+}).play.gui;
+)
+
+Pdef(\myEuroPattern).play;
+
+// e.g. modulate the panning
+Ndef(\myEuroModule).map(\pos, Ndef(\posMod, {SinOsc.kr(1.0)}));
+// fade out in 2 seconds
+Ndef(\myEuroModule).clear(2.0);
 ::
 
 CLASSMETHODS::

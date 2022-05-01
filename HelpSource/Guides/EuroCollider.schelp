@@ -7,12 +7,114 @@ Some introduction.
 
 SECTION:: Quickstart
 
+Please check if your audio interface is DC coupled, see link::Guides/EuroCollider#What is a DC coupled interface::.
+
+
+SUBSECTION:: Configure SuperCollider
+
+It may be necessary to start SuperCollider with enough out- and inputs, therefore it is good practice to explicetely set these settings during startup like
+
+
+code::
+s.options.device_("Studio 1824c").numOutputBusChannels_(8).numInputBusChannels_(8);
+s.reboot;
+::
+
+where you need to replace the device with your audio interface. For more information check link::Classes/ServerOptions#*devices:: and link::Classes/ServerOptions::.
+
+SUBSECTION:: Sequence eurorack via Pbind
+
+For detailed instructions see link::Classes/EuroSynth::
+
+code::
+// wiring: audio interface numbers are counted with 0!
+// module audio output -> audio interface in 6
+// audio interface output 4 -> cvIn on module
+// audio interface output 5 -> trigIn on an envelope generator
+e = EuroSynth(soundIn: 6, cvOut: 4, gateOut: 5, playMonitor: true).tune;
+
+// finish tuning process by following instructions in the post window
+
+// start playing a pattern on your eurorack
+(
+Pdef(\myEuroPattern, Pbind(
+    \type, \euro,
+    \euro, e,
+    \dur, 0.25,
+    \degree, Pxrand((0..6), inf),
+	// determines the length of the gate
+	\legato, Pseq([0.8, 0.2], inf),
+)).play;
+)
+
+// stop pattern
+Pdef(\myEuroPattern).stop;
+// free resources
+e.clear;
+::
+
+Also check out
+list::
+## link::Classes/EuroClockIn::
+## link::Classes/EuroClockOut::
+::
+for more examples concerning clocks.
+
+SECTION:: Use eurorack modulations in SuperCollider
+
+EuroCollider does not provide an interface to use modulations which originate in the eurorack domain in SuperCollider as this can be achived in various ways in SuperCollider.
+We want to show here 2 ways how to achive this.
+
+Assuming that you have a LFO wired up to your audio interface input 6 (including 0!)
+
+code::
+// via ndef
+Ndef(\euroLFO, {SoundIn.ar(6)});
+
+(
+Ndef(\sinOsc, {
+	// AM on SC synth from EuroRack (LF)O
+	var sig = SinOsc.ar([400, 402]) * Ndef(\euroLFO);
+	sig
+}).play;
+)
+// stop listening
+Ndef(\sinOsc).clear;
+
+// another way: via bus
+b = Bus.audio(server: s, numChannels: 1);
+x = {Out.ar(b, SoundIn.ar(6))}.play;
+(
+a = SynthDef(\sinOscEuroMod, {|out|
+	var sig = SinOsc.ar([400, 402]) * \amMod.kr(0.0);
+	Out.ar(out, sig);
+}).play;
+)
+a.map(\amMod, b);
+
+a.free;
+
+// in patterns - via ndef
+Ndef(\euroLFO, {SoundIn.ar(6)});
+
+(
+Pdef(\myEuroMod, Pbind(
+	\instrument, \default,
+	\degree, Pxrand((0..5), inf),
+	\dur, 0.5,
+	\pan, Ndef(\euroLFO).asMap,
+)).play;
+)
+
+Pdef(\myEuroMod).stop;
+::
+
 SECTION:: Supported audio interfaces
 
 SUBSECTION:: What is a DC coupled interface
 
 DC coupled interface allow to output a DC offset to the output.
-A list of audio interfaces can be found e.g. link::https://www.sweetwater.com/sweetcare/articles/which-audio-interfaces-are-dc-coupled/##here::.
+A list of audio interfaces can be found e.g. link::https://www.sweetwater.com/sweetcare/articles/which-audio-interfaces-are-dc-coupled/##here:: but also include interfaces such as Expert Sleeprs ES-8.
 
 This means that with a DC offset of 0.2 a sine wave would not oscillate between -0.1 and 0.1 but between 0.1 and 0.3, so it does not oscillate around zero as a mean.
 Some interfaces do not allow to output such a DC offset to protect the loud speakers by adding a high pass filter which removes any offset which could be seen simply as a really slow oscillation.

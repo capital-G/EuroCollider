@@ -61,6 +61,10 @@ EuroSynth {
 		tuningMap = ();
 		isTuned = false;
 
+		// if gateOut is nil we will create a bus to dump it to somewhere else
+		// shall this get released on clear?
+		gateOut = gateOut ? Bus.audio(Server.default, 1).index;
+
 		this.startControlSynth;
 		CmdPeriod.add({{this.startControlSynth}.defer(0.1)});
 
@@ -76,7 +80,6 @@ EuroSynth {
 	}
 
 	startControlSynth {
-		"Start control synth".postln;
 		controlSynth = SynthDef(\EuroColliderSynth, {|cvOut, gateOut, dcOffset=0, gate=0|
 			var env = EnvGen.ar(
 				envelope: Env.asr(attackTime: 0.001, releaseTime: 0.001),

@@ -58,7 +58,8 @@ link::Classes/Out:: bus number where the cv signal should be put out.
 Needs to be connected to the CV in of the module.
 argument:: gateOut
 Optional link::Classes/Out:: bus number where a gate signal will be put out.
-If you use the associated control synth manually you need to manually close the gate, e.g. via link::Classes/Function#-defer::
+If this is not provided or nil it will spawn a new private audio link::Classes/Bus:: on the server where the output will be headed to in order to not put out on output 0 of the audio interface.
+If you use the associated link::Classes/EuroSynth#-controlSynth:: manually you need to manually close the gate, e.g. via link::Classes/Function#-defer::
 argument:: playMonitor
 If true it will spawn a link::Classes/Ndef:: where the input of the module wil be played back on link::Classes/Bus:: 0 of the audio interface.
 This is more of a convenience method and one should write its own link::Classes/Ndef:: or link::Classes/SynthDef:: to control the output of the eurorack module.

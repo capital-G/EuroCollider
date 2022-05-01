@@ -85,8 +85,9 @@ PRIVATE:: init
 METHOD:: tuningMap
 A link::Classes/Dictionary:: in which the internal relation between CV and frequency is stored.
 
-METHOD:: synth
+METHOD:: controlSynth
 A synth which is used to control the output of the DC offset (aka CV) and the trigger of the EuroSynth.
+This will also respawn if link::Classes/CmdPeriod:: was pressed.
 
 METHOD:: resetTuning
 Will reset the tuning.
@@ -99,6 +100,10 @@ METHOD:: freqCv
 Allows to convert a frequency to a CV value.
 This is used internally when called a pattern is used but can be useful for manula setting of frequencies.
 argument:: freq
+
+METHOD:: startControlSynth
+Internal method which will start a synth which is responsible of emitting the proper DC offset to the synth and providing a gate.
+Normally the synth is created automatically and also revived when stopped via link::Classes/CmdPeriod:: but in case you want to respawn it manually you can do it via this method.
 
 PRIVATE:: curFreq
 

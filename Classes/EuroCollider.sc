@@ -25,7 +25,7 @@ EuroSynth {
 
 	var <curFreq;
 	var oscFunc;
-	var <synth;
+	var <controlSynth;
 	var tuner;
 	var <isTuned;
 	var randSeed;
@@ -59,14 +59,20 @@ EuroSynth {
 		tuningMap = ();
 		isTuned = false;
 
-		synth = SynthDef(\EuroColliderSynth, {|cvOut, trigOut, dcOffset=0, t_gate=0|
+		this.startControlSynth;
+		CmdPeriod.add({{this.startControlSynth}.defer(0.1)});
+	}
+
+	startControlSynth {
+		"Start control synth".postln;
+		controlSynth = SynthDef(\EuroColliderSynth, {|cvOut, trigOut, dcOffset=0, t_gate=0|
 			var env = EnvGen.ar(Env.perc(0.001, 0.1), gate: t_gate);
 			Out.ar(cvOut, DC.ar(1.0)*dcOffset);
 			Out.ar(trigOut, env);
 		}).play(args: [
 			\cvOut, cvOut,
 			\trigOut, trigOut,
-		]);
+		]).register;
 	}
 
 	addTuner {
@@ -89,14 +95,18 @@ EuroSynth {
 		Event.addEventType(\euro, {
 			var euroSynth = ~euro.value;
 			if((euroSynth.class == EuroSynth).not, {
-				^"Add a tuned EuroSynth as \"euro\" parameter to you event".postln;
+				"Add a tuned EuroSynth as \"euro\" parameter to you event".postln;
 			});
-			euroSynth.synth.set(
-				\dcOffset, euroSynth.freqCv(~freq.value).postln;
-			);
-			euroSynth.synth.set(
-				\t_gate, 1.0,
-			);
+			if(euroSynth.controlSynth.isPlaying.not, {
+				"%: Control synth is not running".format(euroSynth).postln;
+			}, {
+				euroSynth.controlSynth.set(
+					\dcOffset, euroSynth.freqCv(~freq.value);
+				);
+				euroSynth.controlSynth.set(
+					\t_gate, 1.0,
+				);
+			});
 		});
 	}
 
@@ -234,7 +244,7 @@ EuroClockIn {
 
 	var oscChannel;
 	var oscFunc;
-	var synth;
+	var controlSynth;
 	var <timeStamps;
 	var <clock;
 
@@ -270,7 +280,7 @@ EuroClockIn {
 
 		Server.default.makeBundle(
 			Server.default.latency,
-			{synth=Synth(\EuroClockIn, [
+			{controlSynth=Synth(\EuroClockIn, [
 				\inBus, in,
 				\threshold, threshold,
 			])}
@@ -321,7 +331,7 @@ EuroClockOut {
 	var clock;
 	var out;
 	var resolution;
-	var <synth;
+	var <controlSynth;
 
 	*new { |clock, out, resolution=1|
 		^super.newCopyArgs(
@@ -334,7 +344,7 @@ EuroClockOut {
 	init {
 		var routine;
 
-		synth = Synth(\EuroColliderClockOut, [
+		controlSynth = Synth(\EuroColliderClockOut, [
 			\out, out,
 		]);
 
@@ -343,7 +353,7 @@ EuroClockOut {
 				Server.default.makeBundle(
 					time: Server.default.latency,
 					func: {
-						synth.set(\t_trig, 1);
+						controlSynth.set(\t_trig, 1);
 					},
 				);
 				resolution.reciprocal.wait;

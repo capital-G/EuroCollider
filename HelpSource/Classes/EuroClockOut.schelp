@@ -36,9 +36,9 @@ INSTANCEMETHODS::
 
 PRIVATE:: init
 
-METHOD:: synth
+METHOD:: controlSynth
 
-A synth which will be used to output the trigger signals.
+A synth which is used to output the trigger signals.
 
 
 EXAMPLES::

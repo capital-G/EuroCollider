@@ -9,6 +9,8 @@ A SuperCollider Quark which allows to communicate with Eurorack modules when use
 Quarks.install("https://github.com/capital-G/EuroCollider.git");
 // restart sclang so EuroCollider is available
 thisProcess.recompile;
+// view help guide for a quick start
+HelpBrowser.openHelpFor("Guides/EuroCollider");
 ```
 
 ## Quickstart

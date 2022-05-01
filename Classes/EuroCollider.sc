@@ -65,8 +65,11 @@ EuroSynth {
 
 	startControlSynth {
 		"Start control synth".postln;
-		controlSynth = SynthDef(\EuroColliderSynth, {|cvOut, trigOut, dcOffset=0, t_gate=0|
-			var env = EnvGen.ar(Env.perc(0.001, 0.1), gate: t_gate);
+		controlSynth = SynthDef(\EuroColliderSynth, {|cvOut, trigOut, dcOffset=0, gate=0|
+			var env = EnvGen.ar(
+				envelope: Env.asr(attackTime: 0.001, releaseTime: 0.001),
+				gate: gate,
+			);
 			Out.ar(cvOut, DC.ar(1.0)*dcOffset);
 			Out.ar(trigOut, env);
 		}).play(args: [
@@ -104,8 +107,12 @@ EuroSynth {
 					\dcOffset, euroSynth.freqCv(~freq.value);
 				);
 				euroSynth.controlSynth.set(
-					\t_gate, 1.0,
+					\gate, 1.0,
 				);
+				// delay the gate down signal by sustain value
+				{euroSynth.controlSynth.set(
+					\gate, 0.0,
+				)}.defer(~sustain.value);
 			});
 		});
 	}

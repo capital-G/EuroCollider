@@ -33,9 +33,10 @@ Pdef(\myEuroPattern, Pbind(
 	\type, \euro,
 	\euro, e,
 	\dur, 0.25,
-	\scale, Scale.chromatic,
+	// as we will send gates instead of triggers
+	// we can also use sustain to define the gate length
+	\sustain, Pseq([0.2, 0.1], inf),
 	\degree, Pxrand((0..12), inf),
-	\octave, Pseq([5, 4], inf),
 )).play;
 )
 
@@ -81,6 +82,8 @@ midi steps which tollerate a deviation from the baseFreq during absolute tuning.
 
 
 PRIVATE:: init
+
+PRIVATE:: prTuningRoutine
 
 METHOD:: tuningMap
 A link::Classes/Dictionary:: in which the internal relation between CV and frequency is stored.

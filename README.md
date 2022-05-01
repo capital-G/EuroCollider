@@ -19,7 +19,7 @@ For precise instructions please check out the provided documents via the SuperCo
 
 ```supercollider
 // assuming server is booted
-e = EuroSynth(soundIn: 6, cvOut: 4, trigOut: 5).tune;
+e = EuroSynth(soundIn: 6, cvOut: 4, gateOut: 5).tune;
 
 (
 Pdef(\myEuroPattern, Pbind(

@@ -18,14 +18,14 @@ In this example we will use
 LIST::
 ## The audio signal of the synth is connected to input 6 (including 0!) of the audio interface
 ## output 4 (including 0!) of the audio interface is connected to the cvIn of the module
-## output 5 (including 0!) is connected to a trigger - this is optional
+## output 5 (including 0!) is connected to a gate input - this is optional
 ::
 
 Also make sure that you have started the server with the appropiated device and number of out- and inputs, see link::Classes/ServerOptions::.
 
 code::
 // define new EuroSynth and tune it directly
-e = EuroSynth(soundIn: 6, cvOut: 4, trigOut: 5).tune;
+e = EuroSynth(soundIn: 6, cvOut: 4, gateOut: 5).tune;
 
 // after the tuning process finished we can use the synth in a pattern
 (
@@ -56,8 +56,13 @@ link::Classes/SoundIn:: bus number where the audio signal of the module is arriv
 argument:: cvOut
 link::Classes/Out:: bus number where the cv signal should be put out.
 Needs to be connected to the CV in of the module.
-argument:: trigOut
-Optional link::Classes/Out:: bus number where a trigger signal will be put out.
+argument:: gateOut
+Optional link::Classes/Out:: bus number where a gate signal will be put out.
+If you use the associated control synth manually you need to manually close the gate, e.g. via link::Classes/Function#-defer::
+argument:: playMonitor
+If true it will spawn a link::Classes/Ndef:: where the input of the module wil be played back on link::Classes/Bus:: 0 of the audio interface.
+This is more of a convenience method and one should write its own link::Classes/Ndef:: or link::Classes/SynthDef:: to control the output of the eurorack module.
+See link::Classes/EuroSynth#-monitor:: for more information.
 argument:: negativeVoltage
 If true it will also allow to output negative voltages.
 Some modules are fine with this (e.g. MakeNoise STO) but others are not (e.g. Mutable Instruments Plaits), therefore it is turned off by default.
@@ -108,9 +113,18 @@ METHOD:: startControlSynth
 Internal method which will start a synth which is responsible of emitting the proper DC offset to the synth and providing a gate.
 Normally the synth is created automatically and also revived when stopped via link::Classes/CmdPeriod:: but in case you want to respawn it manually you can do it via this method.
 
+METHOD:: monitor
+Returns a link::Classes/Ndef:: which maps the soundIn argument to the link::Classes/Out:: 0 of the interface.
+Use it like
+CODE::
+e = EuroSynth(...);
+e.monitor.play;
+e.monitor.stop;
+::
+
 PRIVATE:: curFreq
 
-METHOD:: trigOut
+METHOD:: gateOut
 
 METHOD:: negativeVoltage
 

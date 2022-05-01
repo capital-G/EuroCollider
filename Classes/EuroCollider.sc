@@ -20,7 +20,8 @@ EuroSynth {
 	// private variables
 	var <soundIn;
 	var <cvOut;
-	var <trigOut;
+	var <gateOut;
+	var playMonitor;
 	var <negativeVoltage;
 
 	var <curFreq;
@@ -33,11 +34,12 @@ EuroSynth {
 	var tunerOscChannel;
 	var tunerDefName;
 
-	*new {|soundIn, cvOut, trigOut, negativeVoltage=false|
+	*new {|soundIn, cvOut, gateOut, playMonitor=false, negativeVoltage=false|
 		^super.newCopyArgs(
 			soundIn,
 			cvOut,
-			trigOut,
+			gateOut,
+			playMonitor,
 			negativeVoltage,
 		).init;
 	}
@@ -61,20 +63,30 @@ EuroSynth {
 
 		this.startControlSynth;
 		CmdPeriod.add({{this.startControlSynth}.defer(0.1)});
+
+		if(playMonitor, {
+			this.monitor.play;
+		});
+	}
+
+	monitor {
+		^Ndef("EuroColliderSynth_Monitor%".format(soundIn).asSymbol, {
+			SoundIn.ar(soundIn)
+		});
 	}
 
 	startControlSynth {
 		"Start control synth".postln;
-		controlSynth = SynthDef(\EuroColliderSynth, {|cvOut, trigOut, dcOffset=0, gate=0|
+		controlSynth = SynthDef(\EuroColliderSynth, {|cvOut, gateOut, dcOffset=0, gate=0|
 			var env = EnvGen.ar(
 				envelope: Env.asr(attackTime: 0.001, releaseTime: 0.001),
 				gate: gate,
 			);
 			Out.ar(cvOut, DC.ar(1.0)*dcOffset);
-			Out.ar(trigOut, env);
+			Out.ar(gateOut, env);
 		}).play(args: [
 			\cvOut, cvOut,
-			\trigOut, trigOut,
+			\gateOut, gateOut,
 		]).register;
 	}
 

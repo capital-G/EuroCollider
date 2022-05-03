@@ -1,5 +1,7 @@
 # EuroCollider
 
+![EuroCollider logo](logo.png)
+
 A SuperCollider Quark which allows to communicate with Eurorack modules when used with a DC coupled audio interface.
 
 ## Installation

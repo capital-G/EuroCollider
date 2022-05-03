@@ -264,6 +264,12 @@ EuroSynth {
 		^cv;
 	}
 
+	freq { |newFreq|
+		this.controlSynth.set(
+			\dcOffset, this.freqCv(newFreq)
+		);
+	}
+
 	clear {
 		controlSynth.free;
 		this.resetTuning;

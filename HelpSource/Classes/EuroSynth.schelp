@@ -106,6 +106,9 @@ This is only allowed if the EuroSynth instance was initiated with negativeVoltag
 argument:: minMatch
 midi steps which tollerate a deviation from the baseFreq during absolute tuning.
 
+METHOD:: freq
+Will output the according DC offset on the interface so the oscillator plays the set frequency.
+argument:: newFreq
 
 PRIVATE:: init
 

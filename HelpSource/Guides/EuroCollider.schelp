@@ -122,4 +122,39 @@ Some interfaces do not allow to output such a DC offset to protect the loud spea
 SUBSECTION:: What if I do not have access to a DC coupled interface?
 
 If the interface is not able to output a steady offset it is still able to output spikes which are gates.
-You can also output gates or input CVs from your EuroRack module to the input of SuperCollider.
+You can also use gates or input CVs from your EuroRack module to the input of SuperCollider.
+
+Make sure you have increased the output of your non-DC coupled interface to the maximum, I will use the external headphones jack of my MacBook.
+
+code::
+s.options.outDevice = "External Headphones";
+s.reboot;
+
+(
+a = SynthDef(\gateTest, {
+	// output a 1 Hz impulse on output 0
+	Out.ar(0, Impulse.ar(1.0));
+}).play;
+)
+
+a.free;
+::
+
+You should now be able to use gates from SuperCollider with your Eurorack, which also includes link::Classes/EuroClockOut::.
+
+code::
+e = EuroSynth(soundIn: nil, cvOut: nil, gateOut: 0);
+
+(
+Pdef(\testNonDc, Pbind(
+	\type, \euro,
+	\euro, e,
+	\dur, 0.5,
+	// reduce sustain to make gate shorter
+	\sustain, 0.01,
+)).play;
+)
+::
+
+Your interface may not have enough output to trigger something on your modular.
+In this case try to increase the output of your soundcard.

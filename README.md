@@ -6,6 +6,8 @@ A SuperCollider Quark which allows to communicate with Eurorack modules when use
 
 ## Installation
 
+Please install [sc3-plugins](https://supercollider.github.io/sc3-plugins/) before because we rely on the *Tartini* pitch tracker for the tuning process.
+
 ```supercollider
 // install from git repository
 Quarks.install("https://github.com/capital-G/EuroCollider.git");

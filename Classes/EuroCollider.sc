@@ -132,7 +132,7 @@ EuroSynth {
 		});
 	}
 
-	tune { |baseFreq=55, steps=40, endRange=0.5, negativeSteps=0, minMatch=0.5|
+	tune { |baseFreq=55, steps=20, endRange=0.5, negativeSteps=0, minMatch=0.5|
 		// prepare tuning procedure
 		if((negativeSteps>0).and(negativeVoltage.not), {
 			"%: Please spawn a EuroSynth which allows for negative voltages when tuning in negative domain".format(this).warn;
@@ -153,7 +153,7 @@ EuroSynth {
 			var hasFreq;
 
 			var soundIn = SoundIn.ar(in);
-			#freq, hasFreq = Pitch.kr(soundIn, minFreq: 25, median: 10);
+			#freq, hasFreq = Tartini.kr(soundIn);
 			SendReply.ar(
 				trig: Pulse.ar(10.0),
 				cmdName: tunerOscChannel,

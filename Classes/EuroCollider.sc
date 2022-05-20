@@ -64,6 +64,8 @@ EuroSynth {
 		// if gateOut is nil we will create a bus to dump it to somewhere else
 		// shall this get released on clear?
 		gateOut = gateOut ? Bus.audio(Server.default, 1).index;
+		// same for cvOut which may be necessary in case your interface is non-dc coupled
+		cvOut = cvOut ? Bus.audio(Server.default, 1).index;
 
 		this.startControlSynth;
 		CmdPeriod.add({{this.startControlSynth}.defer(0.1)});

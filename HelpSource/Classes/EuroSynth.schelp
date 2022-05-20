@@ -72,9 +72,9 @@ PRIVATE:: initClass
 
 METHOD:: new
 argument:: soundIn
-link::Classes/SoundIn:: bus number where the audio signal of the module is arriving.
+link::Classes/SoundIn:: bus number where the audio signal of the module is arriving. Can be code::nil:: in case you only want to use the gate functionality in case you do not have a DC coupled interface.
 argument:: cvOut
-link::Classes/Out:: bus number where the cv signal should be put out.
+link::Classes/Out:: bus number where the cv signal should be put out. Can be code::nil:: in case you only want to output gates in case you do not have a DC coupled interface.
 Needs to be connected to the CV in of the module.
 argument:: gateOut
 Optional link::Classes/Out:: bus number where a gate signal will be put out.

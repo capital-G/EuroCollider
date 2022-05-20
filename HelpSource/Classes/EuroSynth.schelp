@@ -165,6 +165,45 @@ PRIVATE:: addTuner
 
 EXAMPLES::
 
+SUBSECTION:: Sync two patterns via Tdef
+
 code::
-_some_example_code_
+// assuming you have two tuned euro synths
+(
+e = EuroSynth(soundIn: 6, cvOut: 4, gateOut: 5).tune;
+f = EuroSynth(soundIn: 7, cvOut: 6, gateOut: 7).tune;
+)
+
+// every 100 steps it will dice a new sequence
+(
+Tdef(\glass, {
+	inf.do({
+		var waitTime = 0.125;
+		var pattern = (0..12).scramble;
+		var noMatch = true;
+		while({noMatch}, {
+			100.do({|i|
+				(
+					\type: \euro,
+					\euro: e,
+					\dur: waitTime,
+					\scale: Scale.minor,
+					\octave: 4,
+					\degree: pattern[0..4].wrapAt(i),
+				).play;
+				(
+					\type: \euro,
+					\euro: f,
+					\dur: waitTime,
+					\scale: Scale.minor,
+					\octave: 4,
+					\degree: pattern[0..5].wrapAt(i),
+				).play;
+				waitTime.wait;
+			});
+			noMatch = false;
+		});
+	});
+}).play;
+)
 ::

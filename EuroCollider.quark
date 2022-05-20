@@ -6,6 +6,7 @@
 	\author: 		"Dennis Scheiba",
 	\organisation:	"IMM Duesseldorf",
 	\helpdoc:		"help",
+	\dependencies:	["wslib"],
 	\since: 		"2022",
 	\version:		0.1
 )

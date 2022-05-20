@@ -1,21 +1,3 @@
-/*
-TODO
-
-* check if audio interface has DC offset
-* add freq2cv(synth) to simple number?
-* add cv2freq
-* add check if clock stopped via a routine?
-* allow to update ClockOut?
-
----
-
-BUGS
-
-* clockin sometimes does not match?
-* clockout: update synth instead of respawning 2
-* ensure that we do not overwrite synthdef on e.g. naming of SendReply
-*/
-
 EuroSynth {
 	// private variables
 	var <soundIn;

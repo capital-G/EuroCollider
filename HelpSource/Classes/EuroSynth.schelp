@@ -110,6 +110,14 @@ METHOD:: freq
 Will output the according DC offset on the interface so the oscillator plays the set frequency.
 argument:: newFreq
 
+METHOD:: plotTuningCurve
+Plots a graph how a frequency is mapped to CV according to our tuning map.
+The lower graph should look like a logarithmic curve and not contain any spikes.
+argument:: startFreq
+lower boundary
+argument:: endFreq
+upper boundary
+
 PRIVATE:: init
 
 PRIVATE:: prTuningRoutine

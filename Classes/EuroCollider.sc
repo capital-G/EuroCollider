@@ -81,6 +81,10 @@ EuroSynth {
 		});
 	}
 
+	plotTuningCurve { |startFreq=50, endFreq=1000|
+		(startFreq..endFreq).collect({|i| [i, this.freqCv(i)]}).flop.plot;
+	}
+
 	startControlSynth {
 		controlSynth = SynthDef(\EuroColliderSynth, {|cvOut, gateOut, dcOffset=0, gate=0|
 			var env = EnvGen.ar(

@@ -141,7 +141,7 @@ EuroSynth {
 			var hasFreq;
 
 			var soundIn = SoundIn.ar(in);
-			#freq, hasFreq = Tartini.kr(soundIn);
+			#freq, hasFreq = Tartini.kr(soundIn, 0.93, 4096, 2048, 1024);
 			SendReply.ar(
 				trig: Pulse.ar(10.0),
 				cmdName: tunerOscChannel,
